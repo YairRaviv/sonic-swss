@@ -14,6 +14,8 @@ class DVSSwitch:
 
     CONFIG_SWITCH_TRIMMING = "SWITCH_TRIMMING"
     KEY_SWITCH_TRIMMING_GLOBAL = "GLOBAL"
+    CONFIG_SWITCH_FAST_LINKUP = "SWITCH_FAST_LINKUP"
+    KEY_SWITCH_FAST_LINKUP_GLOBAL = "GLOBAL"
 
     COUNTERS_COUNTERS = "COUNTERS"
 
@@ -29,6 +31,13 @@ class DVSSwitch:
     ) -> None:
         """Update switch trimming global in CONFIG DB."""
         self.config_db.update_entry(self.CONFIG_SWITCH_TRIMMING, self.KEY_SWITCH_TRIMMING_GLOBAL, qualifiers)
+
+    def update_switch_fast_linkup(
+        self,
+        qualifiers: Dict[str, str]
+    ) -> None:
+        """Update switch fast link-up global in CONFIG DB."""
+        self.config_db.update_entry(self.CONFIG_SWITCH_FAST_LINKUP, self.KEY_SWITCH_FAST_LINKUP_GLOBAL, qualifiers)
 
     def get_switch_ids(
         self,
