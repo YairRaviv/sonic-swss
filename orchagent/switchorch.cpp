@@ -2005,7 +2005,7 @@ void SwitchOrch::setFastLinkupCapability()
     std::vector<FieldValueTuple> fvVector;
 
     // Determine support by checking create/set capability on polling time attribute (enabled in real SAI)
-    bool supported = querySwitchCapability(SAI_OBJECT_TYPE_SWITCH, SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIME);
+    bool supported = querySwitchCapability(SAI_OBJECT_TYPE_SWITCH, SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIMEOUT);
     m_fastLinkupCap.supported = supported;
 
     if (!supported)
@@ -2020,7 +2020,7 @@ void SwitchOrch::setFastLinkupCapability()
     // Query allowed ranges if supported by SAI
     {
         sai_attribute_t attr;
-        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIME_RANGE;
+        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIMEOUT_RANGE;
         sai_status_t status = sai_switch_api->get_switch_attribute(gSwitchId, 1, &attr);
         if (status == SAI_STATUS_SUCCESS)
         {
@@ -2039,13 +2039,13 @@ void SwitchOrch::setFastLinkupCapability()
 
     {
         sai_attribute_t attr;
-        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIME_RANGE;
+        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIMEOUT_RANGE;
         sai_status_t status = sai_switch_api->get_switch_attribute(gSwitchId, 1, &attr);
         if (status == SAI_STATUS_SUCCESS)
         {
             m_fastLinkupCap.has_ranges = true;
-            m_fastLinkupCap.guard_min = attr.value.u8range.min;
-            m_fastLinkupCap.guard_max = attr.value.u8range.max;
+            m_fastLinkupCap.guard_min = attr.value.u16range.min;
+            m_fastLinkupCap.guard_max = attr.value.u16range.max;
             fvVector.emplace_back(
                 SWITCH_CAPABILITY_TABLE_FAST_LINKUP_GUARD_TIMER_RANGE,
                 to_string(m_fastLinkupCap.guard_min) + "," + to_string(m_fastLinkupCap.guard_max));
@@ -2091,7 +2091,7 @@ bool SwitchOrch::setSwitchFastLinkup(const FastLinkupConfig &cfg)
     if (cfg.has_polling)
     {
         sai_attribute_t attr;
-        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIME;
+        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIMEOUT;
         attr.value.u16 = cfg.polling_time;
         status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
         if (status != SAI_STATUS_SUCCESS)
@@ -2104,7 +2104,7 @@ bool SwitchOrch::setSwitchFastLinkup(const FastLinkupConfig &cfg)
     if (cfg.has_guard)
     {
         sai_attribute_t attr;
-        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIME;
+        attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIMEOUT;
         attr.value.u8 = cfg.guard_time;
         status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
         if (status != SAI_STATUS_SUCCESS)
@@ -2118,19 +2118,19 @@ bool SwitchOrch::setSwitchFastLinkup(const FastLinkupConfig &cfg)
     {
         sai_attribute_t attr;
         attr.id = SAI_SWITCH_ATTR_FAST_LINKUP_BER_THRESHOLD;
-        attr.value.s8 = cfg.ber_threshold;
+        attr.value.u8 = cfg.ber_threshold;
         status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
         if (status != SAI_STATUS_SUCCESS)
         {
-            SWSS_LOG_NOTICE("Failed to set FAST_LINKUP_BER_THRESHOLD=%d: %s", cfg.ber_threshold, sai_serialize_status(status).c_str());
+            SWSS_LOG_NOTICE("Failed to set FAST_LINKUP_BER_THRESHOLD=%u: %s", cfg.ber_threshold, sai_serialize_status(status).c_str());
             return false;
         }
     }
-    SWSS_LOG_INFO("Configured fast link-up: polling%s guard%s ber%s",
-                    cfg.has_polling ? " set" : " skipped",
-                    cfg.has_guard ? " set" : " skipped",
-                    cfg.has_ber ? " set" : " skipped");
-    return true;
+    SWSS_LOG_INFO("Fast link-up set: polling_time=%s, guard_time=%s, ber_threshold=%s",
+        cfg.has_polling ? std::to_string(cfg.polling_time).c_str() : "N/A",
+        cfg.has_guard   ? std::to_string(cfg.guard_time).c_str()   : "N/A",
+        cfg.has_ber     ? std::to_string(cfg.ber_threshold).c_str() : "N/A");
+return true;
 }
 
 void SwitchOrch::doCfgSwitchFastLinkupTableTask(Consumer &consumer)
@@ -2165,7 +2165,7 @@ void SwitchOrch::doCfgSwitchFastLinkupTableTask(Consumer &consumer)
                 }
                 else if (fieldName == "ber_threshold")
                 {
-                    try { cfg.ber_threshold = to_int<int8_t>(fieldValue); cfg.has_ber = true; }
+                    try { cfg.ber_threshold = to_uint<uint8_t>(fieldValue); cfg.has_ber = true; }
                     catch (...) { SWSS_LOG_ERROR("Invalid ber_threshold value %s", fieldValue.c_str()); }
                 }
                 else

@@ -46,8 +46,8 @@ class TestFastLinkupSwss(object):
         switch_oid = get_switch_oid(dvs)
         # Values are stored as strings in ASIC DB tables
         expected = {
-            'SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIME': '60',
-            'SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIME': '10',
+            'SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIMEOUT': '60',
+            'SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIMEOUT': '10',
             'SAI_SWITCH_ATTR_FAST_LINKUP_BER_THRESHOLD': '12',
         }
         expect_switch_attrs(dvs, switch_oid, expected)
@@ -72,9 +72,9 @@ class TestFastLinkupSwss(object):
             switch_oid = get_switch_oid(dvs)
             try:
                 dvs.asic_db.wait_for_field_negative_match("ASIC_STATE:SAI_OBJECT_TYPE_SWITCH", switch_oid,
-                    {'SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIME': str(max(poll_min - 1, 0))})
+                    {'SAI_SWITCH_ATTR_FAST_LINKUP_POLLING_TIMEOUT': str(max(poll_min - 1, 0))})
                 dvs.asic_db.wait_for_field_negative_match("ASIC_STATE:SAI_OBJECT_TYPE_SWITCH", switch_oid,
-                    {'SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIME': str(max(guard_min - 1, 0))})
+                    {'SAI_SWITCH_ATTR_FAST_LINKUP_GUARD_TIMEOUT': str(max(guard_min - 1, 0))})
             except Exception:
                 # On VS without validation paths, skip strict assertion
                 pass

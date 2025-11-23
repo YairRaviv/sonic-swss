@@ -113,7 +113,7 @@ private:
     {
         bool has_polling = false; uint16_t polling_time = 0;
         bool has_guard   = false; uint8_t  guard_time   = 0;
-        bool has_ber     = false; int8_t   ber_threshold= 0;
+        bool has_ber     = false; uint8_t   ber_threshold= 0;
     };
 
     struct FastLinkupCapabilities
@@ -121,7 +121,7 @@ private:
         bool supported = false;
         bool has_ranges = false;
         uint16_t polling_min = 0, polling_max = 0;
-        uint8_t  guard_min   = 0, guard_max   = 0;
+        uint16_t  guard_min   = 0, guard_max   = 0;
     };
 
     void setFastLinkupCapability();
